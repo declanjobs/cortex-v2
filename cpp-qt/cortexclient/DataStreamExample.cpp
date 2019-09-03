@@ -3,10 +3,12 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 ***************/
@@ -18,6 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 #include <QTimer>
 #include <QtDebug>
 
+#include <queue>
+
+using namespace std;
+
+static queue <QJsonArray> receive_fifo;
+int rcv_timeout = 3;
 
 DataStreamExample::DataStreamExample(QObject *parent) : QObject(parent) {
     connect(&client, &CortexClient::connected, this, &DataStreamExample::onConnected);
@@ -39,6 +47,32 @@ void DataStreamExample::start(QString stream, bool activateSession, QString lice
     nextDataTime = 0;
     client.open();
 }
+
+void DataStreamExample::set_receive_timeout(int t)
+{
+    if(t == 0)
+    {
+        qInfo() << "Timeout is set to zero, streaming won't stop unless user interrupts.";
+    }
+
+    rcv_timeout = t;
+}
+
+
+bool DataStreamExample::readFIFO(QJsonArray *data)
+{
+    if(!receive_fifo.empty())
+    {
+        QJsonArray temp = receive_fifo.front();
+
+        memcpy(data, &temp, sizeof(temp));
+
+        receive_fifo.pop();
+        return true;
+    }
+    else return false;
+}
+
 
 void DataStreamExample::onConnected() {
     qInfo() << "Connected to Cortex.";
@@ -84,13 +118,25 @@ void DataStreamExample::onLoadProfileOk(QString profileName)
 
 void DataStreamExample::onSubscribeOk(QStringList streams) {
     qInfo() << "Subscription successful for data streams" << streams;
-    qInfo() << "Receiving data for 30 seconds.";
-    QTimer::singleShot(30*1000, this, &DataStreamExample::unsubscribe);
+    qInfo() << "Receiving data for"  << rcv_timeout <<  "seconds.";
+
+    if(rcv_timeout)
+    {
+        QTimer::singleShot(rcv_timeout*1000, this, &DataStreamExample::unsubscribe);
+    }
+
 }
 
 void DataStreamExample::onStreamDataReceived(
         QString sessionId, QString stream, double time, const QJsonArray &data) {
     Q_UNUSED(sessionId);
+
+        while(receive_fifo.size() >= MAX_FIFO_SIZE)
+    {
+        receive_fifo.pop();
+    }
+
+    receive_fifo.push(data);
     // a data stream can publish data with a high frequency
     // we display only a few samples per second
     if (time >= nextDataTime) {
@@ -98,6 +144,11 @@ void DataStreamExample::onStreamDataReceived(
         nextDataTime = time + 0.2;
     }
 }
+
+void DataStreamExample::stop() {
+    client.unsubscribe(token, sessionId, stream);
+}
+
 
 void DataStreamExample::unsubscribe() {
     client.unsubscribe(token, sessionId, stream);
