@@ -22,8 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
  * account on emotiv.com and create a Cortex app.
  * https://www.emotiv.com/my-account/cortex-apps/
  */
-static const QString ClientId = "The client id of your Cortex app goes here";
-static const QString ClientSecret = "The client secret of your Cortex app goes here";
+static const QString ClientId = "2A92EgxFIHadeRjLlvcVZp5YNCIScbOy1y1RuuBc";
+static const QString ClientSecret = "7wQkb9sNteuyNlnYfmCQQn0vIHHVZ47UecQkeaPTEJaCwsKe1WvQLH93OCaee1PzEBbo64nMbBusJQ2Q52BTo0Tr2lTkKWbu1kl1buIgtQKs1yG1d0zuHhNqILXz0dHv";
+
 
 // The name of the training profile used for the facial expression and mental command
 static const QString TrainingProfileName = "cortex-v2-example";
