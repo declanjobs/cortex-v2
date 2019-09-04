@@ -36,6 +36,9 @@ public:
 
     // you need to activate the session if you want to get the EEG data
     void start(QString stream, bool activateSession, QString license = "");
+    void stop();
+
+    void set_receive_timeout(int t);
 
     bool readFIFO(QJsonArray *data);
 
@@ -70,5 +73,7 @@ private:
     QString sessionId;
     double nextDataTime;
 };
+
+extern int rcv_timeout;
 
 #endif // DATASTREAMEXAMPLE_H

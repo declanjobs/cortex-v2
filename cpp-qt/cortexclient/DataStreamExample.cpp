@@ -41,6 +41,13 @@ DataStreamExample::DataStreamExample(QObject *parent) : QObject(parent) {
 }
 
 void DataStreamExample::start(QString stream, bool activateSession, QString license) {
+
+        while(!receive_fifo.empty())
+    {
+        // Empty the FIFO first
+        receive_fifo.pop();
+    }
+
     this->stream = stream;
     this->activateSession = activateSession;
     this->license = license;
@@ -147,11 +154,17 @@ void DataStreamExample::onStreamDataReceived(
 
 void DataStreamExample::stop() {
     client.unsubscribe(token, sessionId, stream);
+
+    QJsonArray _eof = {EOF};
+    receive_fifo.push(_eof);
 }
 
 
 void DataStreamExample::unsubscribe() {
     client.unsubscribe(token, sessionId, stream);
+
+    QJsonArray _eof = {EOF};
+    receive_fifo.push(_eof);
 }
 
 void DataStreamExample::onUnsubscribeOk(QStringList streams) {
