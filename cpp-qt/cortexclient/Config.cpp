@@ -12,25 +12,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 ***************/
-#pragma once
 
-#include <QString>
-#include <QJsonObject>
+#include "Config.h"
 
-/*
- * To get a client id and a client secret, you must connect to your Emotiv
- * account on emotiv.com and create a Cortex app.
- * https://www.emotiv.com/my-account/cortex-apps/
- */
-extern QString ClientId;
-extern QString ClientSecret;
+QString ClientId;
+QString ClientSecret;
 
 // The name of the training profile used for the facial expression and mental command
-extern QString TrainingProfileName;
-
-// If you use an Epoc Flex headset, then you must put your configuration here
-static const QJsonObject FlexMapping = {
-    { "LA", "AF3" },
-    { "LB", "AF7" }
-    // etc...
-};
+QString TrainingProfileName = "cortex-v2-example";

@@ -21,6 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 #include "SessionCreator.h"
 #include "Headset.h"
 
+#define MAX_FIFO_SIZE    1280
+
+#ifndef EOF
+#define EOF -128
+#endif
+
 /*
  * Connects to a headset and displays the data from a stream.
  *
@@ -34,6 +40,12 @@ public:
 
     // you need to activate the session if you want to get the EEG data
     void start(QString stream, bool activateSession, QString license = "");
+
+    void stop();
+
+    void set_receive_timeout(int t);
+
+    bool readFIFO(QJsonArray *data);
 
 private slots:
     void onConnected();
@@ -66,5 +78,7 @@ private:
     QString sessionId;
     double nextDataTime;
 };
+
+extern int rcv_timeout;
 
 #endif // DATASTREAMEXAMPLE_H
